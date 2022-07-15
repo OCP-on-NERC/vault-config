@@ -7,10 +7,19 @@
 - name: "{{ cluster_name }}: Generate policy"
   tags: [vault-cluster-policy, policy.prep]
   template:
-    src: policy.j2.hcl
-    dest: policies/{{ cluster_name }}.hcl
+    src: "{{ item }}"
+    dest: "policies/{{ policyname }}.hcl"
+  vars:
+    policyname: "{{ cluster_name }}-{{ item|basename|split('.')|first }}"
+  loop: "{{ query('fileglob', 'templates/policies/*.hcl') }}"
+  register: policies
 
 - name: "{{ cluster_name }}: Install policy"
   tags: [vault-cluster-policy, policy.install]
   command: >-
-    vault policy write "{{ cluster_name }}-reader" "policies/{{ cluster_name }}.hcl"
+    vault policy write "{{ policyname }}" "{{ item.dest }}"
+  vars:
+    policyname: "{{ item.dest|basename|split('.')|first }}"
+  loop: "{{ policies.results }}"
+  loop_control:
+    label: "{{ policyname }}"
