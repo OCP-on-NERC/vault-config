@@ -29,9 +29,9 @@
       loop: "{{ query('fileglob', 'common_policies/*.hcl') }}"
 
     - name: Install per-cluster policies
-      tags: [vault-readonly-policy]
+      tags: [vault-cluster-policy]
       include_role:
-        name: vault-readonly-policy
+        name: vault-cluster-policy
       loop: "{{ all_clusters|flatten }}"
       loop_control:
         loop_var: cluster_name
