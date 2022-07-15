@@ -2,7 +2,8 @@
   gather_facts: false
   vars:
     vault_cluster: nerc-ocp-infra
-    external_clusters:
+    cluster_names:
+      - "{{ vault_cluster }}"
       - nerc-ocp-prod
       - nerc-ocp-test
   tasks:
@@ -32,25 +33,14 @@
       tags: [vault-cluster-policy]
       include_role:
         name: vault-cluster-policy
-      loop: "{{ all_clusters|flatten }}"
+      loop: "{{ cluster_names }}"
       loop_control:
         loop_var: cluster_name
-      vars:
-        all_clusters:
-          - "{{ vault_cluster }}"
-          - "{{ external_clusters }}"
 
     - name: Configure auth for internal cluster
       tags: [vault-kubernetes-auth]
       include_role:
         name: vault-kubernetes-auth
-      vars:
-        cluster_name: nerc-ocp-infra
-
-    - name: Configure auth for external cluster
-      tags: [vault-approle-auth]
-      include_role:
-        name: vault-approle-auth
-      loop: "{{ external_clusters }}"
+      loop: "{{ cluster_names }}"
       loop_control:
         loop_var: cluster_name
