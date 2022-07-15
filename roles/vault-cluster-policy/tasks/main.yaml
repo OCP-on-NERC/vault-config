@@ -4,7 +4,7 @@
     path: policies
     state: directory
 
-- name: "{{ cluster_name }}: Generate policy"
+- name: "{{ cluster_name }}: Generate policies"
   tags: [vault-cluster-policy, policy.prep]
   template:
     src: "{{ item }}"
@@ -14,7 +14,7 @@
   loop: "{{ query('fileglob', 'templates/policies/*.hcl') }}"
   register: policies
 
-- name: "{{ cluster_name }}: Install policy"
+- name: "{{ cluster_name }}: Install policies"
   tags: [vault-cluster-policy, policy.install]
   command: >-
     vault policy write "{{ policyname }}" "{{ item.dest }}"
