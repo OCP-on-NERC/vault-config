@@ -1,16 +1,16 @@
 - name: "{{ cluster_name }}: Ensure policies directory exists"
-  tags: [vault-readonly-policy, policy.prep]
+  tags: [vault-cluster-policy, policy.prep]
   file:
     path: policies
     state: directory
 
 - name: "{{ cluster_name }}: Generate policy"
-  tags: [vault-readonly-policy, policy.prep]
+  tags: [vault-cluster-policy, policy.prep]
   template:
     src: policy.j2.hcl
     dest: policies/{{ cluster_name }}.hcl
 
 - name: "{{ cluster_name }}: Install policy"
-  tags: [vault-readonly-policy, policy.install]
+  tags: [vault-cluster-policy, policy.install]
   command: >-
     vault policy write "{{ cluster_name }}-reader" "policies/{{ cluster_name }}.hcl"
