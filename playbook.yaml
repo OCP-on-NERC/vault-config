@@ -41,6 +41,5 @@
       tags: [vault-kubernetes-auth]
       include_role:
         name: vault-kubernetes-auth
-      loop: "{{ cluster_names }}"
-      loop_control:
-        loop_var: cluster_name
+      vars:
+        cluster_name: nerc-ocp-infra
