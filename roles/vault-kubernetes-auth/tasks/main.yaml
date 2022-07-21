@@ -31,7 +31,7 @@
   command: >-
     vault write auth/kubernetes/{{ cluster_name }}/role/secret-reader
         bound_service_account_names=vault-secret-reader
-        bound_service_account_namespaces=external-secrets-config
+        bound_service_account_namespaces=external-secrets-operator
         policies={{ cluster_name }}-reader
   when: >-
     "{}-reader".format(cluster_name) not in (roles.stdout|from_json)
