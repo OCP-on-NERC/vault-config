@@ -1,37 +1,32 @@
-- name: "{{ cluster_name }}: Get enabled auth methods"
-  tags: [vault-kubernetes-auth, auth]
-  command: >-
-    vault auth list -format json
-  changed_when: false
-  register: auths_enabled
+- name: "{{ cluster_name }}: check if auth method is enabled"
+  community.hashi_vault.vault_read:
+    token_validate: false
+    path: /sys/auth
+  register: auths
+  changed_when: >-
+    "kubernetes/{}/".format(cluster_name) not in auths.data
 
-- name: "{{ cluster_name }}: Enable kubernetes auth"
-  tags: [vault-kubernetes-auth, auth]
-  command: >-
-    vault auth enable -path kubernetes/{{ cluster_name }} kubernetes
+- name: "{{ cluster_name }}: enable kubernetes auth"
   when: >-
-    "kubernetes/{}/".format(cluster_name) not in (auths_enabled.stdout|from_json)
+    auths is changed
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "/sys/auth/kubernetes/{{ cluster_name }}"
+    data:
+      type: kubernetes
 
-- name: "{{ cluster_name }}: Configure kubernetes auth"
-  tags: [vault-kubernetes-auth, auth]
-  command: >-
-    vault write auth/kubernetes/{{ cluster_name }}/config
-    kubernetes_host=https://kubernetes.default.svc
+- name: "{{ cluster_name }}: configure kubernetes auth"
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "/auth/kubernetes/{{ cluster_name }}/config"
+    data:
+      kubernetes_host: "{{ kubernetes_host }}"
 
-- name: "{{ cluster_name }}: Get roles"
-  tags: [vault-kubernetes-auth, role]
-  command: >-
-    vault list -format json auth/kubernetes/{{ cluster_name }}/role
-  changed_when: false
-  failed_when: roles.rc not in [0, 2]
-  register: roles
-
-- name: "{{ cluster_name }}: Create role for clustersecretstore"
-  tags: [vault-kubernetes-auth, role]
-  command: >-
-    vault write auth/kubernetes/{{ cluster_name }}/role/secret-reader
-        bound_service_account_names=vault-secret-reader
-        bound_service_account_namespaces=external-secrets-operator
-        policies={{ cluster_name }}-reader
-  when: >-
-    "{}-reader".format(cluster_name) not in (roles.stdout|from_json)
+- name: "{{ cluster_name }}: configure role for clustersecretstore"
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "/auth/kubernetes/{{ cluster_name }}/role/secret-reader"
+    data:
+      policies: "{{ cluster_name }}-reader"
+      bound_service_account_names: "{{ kubernetes_service_account_names }}"
+      bound_service_account_namespaces: "{{ kubernetes_service_account_namespaces }}"

@@ -1,25 +1,12 @@
-- name: "{{ cluster_name }}: Ensure policies directory exists"
-  tags: [vault-cluster-policy, policy.prep]
-  file:
-    path: policies
-    state: directory
-
-- name: "{{ cluster_name }}: Generate policies"
-  tags: [vault-cluster-policy, policy.prep]
-  template:
-    src: "{{ item }}"
-    dest: "policies/{{ policyname }}.hcl"
+- name: "{{ cluster_name }}: Install policies"
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "sys/policy/{{ policyname }}"
+    data:
+      name: "{{ policyname }}"
+      rules: "{{ lookup('template', item) }}"
   vars:
     policyname: "{{ cluster_name }}-{{ item|basename|split('.')|first }}"
   loop: "{{ query('fileglob', 'templates/policies/*.hcl') }}"
-  register: policies
-
-- name: "{{ cluster_name }}: Install policies"
-  tags: [vault-cluster-policy, policy.install]
-  command: >-
-    vault policy write "{{ policyname }}" "{{ item.dest }}"
-  vars:
-    policyname: "{{ item.dest|basename|split('.')|first }}"
-  loop: "{{ policies.results }}"
   loop_control:
     label: "{{ policyname }}"

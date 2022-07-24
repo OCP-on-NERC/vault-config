@@ -1,0 +1,52 @@
+- name: "{{ group_name }}: get mount accessor"
+  set_fact:
+    mount_accessor: "{{ lookup('community.hashi_vault.vault_read', 'sys/auth')['oidc/'].accessor }}"
+
+- debug:
+    var: mount_accessor
+
+- name: "{{ group_name }}: check if group exists"
+  community.hashi_vault.vault_read:
+    token_validate: false
+    path: "identity/group/name/{{ group_name }}"
+  failed_when: false
+  changed_when: false
+  register: group1
+
+- name: "{{ group_name }}: create group"
+  when: >-
+    "data" not in group1
+  block:
+    - community.hashi_vault.vault_write:
+        token_validate: false
+        path: identity/group
+        data:
+          name: "{{ group_name }}"
+          type: external
+          policies: "{{ group_policy }}"
+
+    - name: "{{ group_name }}: read group data"
+      community.hashi_vault.vault_read:
+        token_validate: false
+        path: "identity/group/name/{{ group_name }}"
+      failed_when: false
+      changed_when: false
+      register: group2
+
+- set_fact:
+    group: >-
+      {{ group2.data|default(false) | ternary(group2.data, group1.data) }}
+
+- assert:
+    that: group.data.name == group_name
+
+- name: "{{ group_name }}: create alias"
+  when: >-
+    group.data.alias.name|default("") != group_name
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: identity/group-alias
+    data:
+      name: "{{ group_name }}"
+      mount_accessor: "{{ mount_accessor }}"
+      canonical_id: "{{ group.data.id }}"
