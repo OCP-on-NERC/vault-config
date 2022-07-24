@@ -1,0 +1,18 @@
+- name: "{{ secret_store_path }}: check if kv2 secret store exists"
+  community.hashi_vault.vault_read:
+    token_validate: false
+    path: "/sys/mounts"
+  changed_when: >-
+    "{}/".format(secret_store_path) not in mounts.data
+  failed_when: false
+  register: mounts
+
+- name: "{{ secret_store_path }}: enable kv2 secret store"
+  when: mounts is changed
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "/sys/mounts/{{ secret_store_path }}"
+    data:
+      kv: 2
+      options:
+        version: 2

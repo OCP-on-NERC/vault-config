@@ -19,11 +19,11 @@
         vault_cluster not in lookup("env", "VAULT_ADDR")
 
     - name: Configure secret engine
-      tags: [vault-secret-store]
+      tags: [vault-kv2-store]
       include_role:
-        name: vault-secret-store
+        name: vault-kv2-store
         apply:
-          tags: vault-secret-store
+          tags: vault-kv2-store
       vars:
         secret_store_path: nerc
 
