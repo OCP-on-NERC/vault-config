@@ -1,0 +1,3 @@
+oidc_path: oidc
+oidc_client_id: vault
+oidc_default_role: ocp-user

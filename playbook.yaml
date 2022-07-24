@@ -37,3 +37,13 @@
         name: vault-kubernetes-auth
       vars:
         cluster_name: nerc-ocp-infra
+
+    - name: Configure oidc auth
+      tags: [vault-oidc-auth]
+      import_role:
+        name: vault-oidc-auth
+      vars:
+        oidc_discovery_url: https://dex-dex.apps.nerc-ocp-infra.rc.fas.harvard.edu
+        oidc_redirect_uris: "https://vault-ui-vault.apps.nerc-ocp-infra.rc.fas.harvard.edu/ui/vault/auth/oidc/oidc/callback"
+        oidc_client_secret_path: nerc/nerc-ocp-infra/dex/dex-clients
+        oidc_client_secret_key: VAULT_SECRET

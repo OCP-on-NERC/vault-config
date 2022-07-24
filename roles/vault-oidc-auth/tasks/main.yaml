@@ -1,0 +1,37 @@
+- name: Get client secret
+  command: >-
+    vault kv get --format json {{ oidc_client_secret_path }}
+  register: client_secret_raw
+
+- name: Set client secret fact
+  set_fact:
+    client_secret: "{{ (client_secret_raw.stdout|from_json).data.data[oidc_client_secret_key] }}"
+
+- name: "Get enabled auth methods"
+  command: >-
+    vault auth list -format json
+  changed_when: false
+  register: auths_enabled
+
+- name: "Enable OIDC auth"
+  command: >-
+    vault auth enable -path {{ oidc_path }} oidc
+  when: >-
+    "{}/".format(oidc_path) not in (auths_enabled.stdout|from_json)
+
+- name: "Configure OIDC auth"
+  command: >-
+    vault write auth/{{ oidc_path }}/config \
+            oidc_discovery_url="{{ oidc_discovery_url }}" \
+            oidc_client_id="{{ oidc_client_id }}" \
+            oidc_client_secret="{{ client_secret }}" \
+            default_role="{{ oidc_default_role }}"
+
+- name: "Configure role for OIDC auth"
+  command: >-
+    vault write auth/{{ oidc_path }}/role/{{ oidc_default_role }}
+      policies=default \
+      user_claim=name \
+      groups_claim=groups \
+      allowed_redirect_uris="{{ oidc_redirect_uris }}" \
+      oidc_scopes=openid,email,groups,profile
