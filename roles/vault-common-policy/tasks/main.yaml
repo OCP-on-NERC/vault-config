@@ -1,0 +1,4 @@
+- name: Install common policies
+  command: >-
+    vault policy write "{{ (item|basename|splitext)[0] }}" "{{ item }}"
+  loop: "{{ query('fileglob', 'common_policies/*.hcl') }}"

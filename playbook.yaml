@@ -7,27 +7,21 @@
       - nerc-ocp-prod
       - nerc-ocp-test
   tasks:
-    - name: Avoid being a dum dum
+    - name: Avoid trying to change the wrong vault instance
       fail:
         msg: "Incorrect vault credentials"
       when: >-
         vault_cluster not in lookup("env", "VAULT_ADDR")
 
-    - name: Get enabled secret stores
-      command: >-
-        vault secrets list -format json
-      register: enabled_stores
+    - import_role:
+        name: vault-secret-store
+      tags: [vault-secret-store]
+      vars:
+        secret_store_path: nerc
 
-    - name: Create secret store
-      command: >-
-        vault secrets enable -version=2 -path "nerc" kv
-      when: >-
-        "nerc/" not in (enabled_stores.stdout|from_json)
-
-    - name: Install common policies
-      command: >-
-        vault policy write "{{ (item|basename|splitext)[0] }}" "{{ item }}"
-      loop: "{{ query('fileglob', 'common_policies/*.hcl') }}"
+    - tags: [vault-common-policy]
+      import_role:
+        name: vault-common-policy
 
     - name: Install per-cluster policies
       tags: [vault-cluster-policy]
