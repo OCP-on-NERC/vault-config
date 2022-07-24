@@ -18,15 +18,21 @@
       when: >-
         vault_cluster not in lookup("env", "VAULT_ADDR")
 
-    - import_role:
-        name: vault-secret-store
+    - name: Configure secret engine
       tags: [vault-secret-store]
+      include_role:
+        name: vault-secret-store
+        apply:
+          tags: vault-secret-store
       vars:
         secret_store_path: nerc
 
-    - tags: [vault-common-policy]
-      import_role:
+    - name: Configure global policies
+      tags: [vault-common-policy]
+      include_role:
         name: vault-common-policy
+        apply:
+          tags: vault-common-policy
 
     - name: Install per-cluster policies
       tags: [vault-cluster-policy]
@@ -47,8 +53,10 @@
 
     - name: Configure oidc auth
       tags: [vault-oidc-auth]
-      import_role:
+      include_role:
         name: vault-oidc-auth
+        apply:
+          tags: [vault-oidc-auth]
       vars:
         oidc_discovery_url: https://dex-dex.apps.nerc-ocp-infra.rc.fas.harvard.edu
         oidc_redirect_uris: "https://vault-ui-vault.apps.nerc-ocp-infra.rc.fas.harvard.edu/ui/vault/auth/oidc/oidc/callback"
