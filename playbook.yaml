@@ -6,6 +6,11 @@
       - "{{ vault_cluster }}"
       - nerc-ocp-prod
       - nerc-ocp-test
+    vault_groups:
+      - name: nerc-ops
+        policy: nerc-all-writer
+      - name: nerc-org-admins
+        policy: admin
   tasks:
     - name: Avoid trying to change the wrong vault instance
       fail:
@@ -47,3 +52,14 @@
         oidc_redirect_uris: "https://vault-ui-vault.apps.nerc-ocp-infra.rc.fas.harvard.edu/ui/vault/auth/oidc/oidc/callback"
         oidc_client_secret_path: nerc/nerc-ocp-infra/dex/dex-clients
         oidc_client_secret_key: VAULT_SECRET
+
+    - name: Create groups
+      tags: [vault-group]
+      include_role:
+        name: vault-group
+        apply:
+          tags: [vault-group]
+      vars:
+        group_name: "{{ item.name }}"
+        group_policy: "{{ item.policy }}"
+      loop: "{{ vault_groups }}"
