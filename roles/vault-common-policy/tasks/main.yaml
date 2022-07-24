@@ -1,4 +1,10 @@
 - name: Install common policies
-  command: >-
-    vault policy write "{{ (item|basename|splitext)[0] }}" "{{ item }}"
+  community.hashi_vault.vault_write:
+    token_validate: false
+    path: "sys/policy/{{ name }}"
+    data:
+      name: "{{ name }}"
+      rules: "{{ lookup('file', item) }}"
+  vars:
+    name: "sys/policy/{{ (item|basename|splitext)[0] }}"
   loop: "{{ query('fileglob', 'common_policies/*.hcl') }}"
