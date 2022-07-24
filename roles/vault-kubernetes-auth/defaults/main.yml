@@ -1,0 +1,2 @@
+kubernetes_host: https://kubernetes.default.svc
+kubernetes_service_account_names: vault-secret-reader
