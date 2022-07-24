@@ -32,6 +32,8 @@
       tags: [vault-cluster-policy]
       include_role:
         name: vault-cluster-policy
+        apply:
+          tags: [vault-cluster-policy]
       loop: "{{ cluster_names }}"
       loop_control:
         loop_var: cluster_name
