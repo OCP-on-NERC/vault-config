@@ -21,6 +21,7 @@
     path: "/auth/kubernetes/{{ cluster_name }}/config"
     data:
       kubernetes_host: "{{ kubernetes_host }}"
+      token_reviewer_jwt: "{{ kubernetes_token_reviewer_jwt|default(omit) }}"
 
 - name: "{{ cluster_name }}: configure role for clustersecretstore"
   community.hashi_vault.vault_write:

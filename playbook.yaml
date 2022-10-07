@@ -54,6 +54,19 @@
         cluster_name: nerc-ocp-infra
         kubernetes_service_account_namespaces: external-secrets-operator
 
+    - name: Configure auth for prod cluster
+      tags: [vault-kubernetes-auth]
+      include_role:
+        name: vault-kubernetes-auth
+        apply:
+          tags: [vault-kubernetes-auth]
+      vars:
+        cluster_name: nerc-ocp-prod
+        kubernetes_host: https://api.nerc-ocp-prod.rc.fas.harvard.edu:6443
+        kubernetes_service_account_namespaces: openshift-config,openshift-ingress-operator
+        kubernetes_service_account_names: vault-secret-reader
+        kubernetes_token_reviewer_jwt: "{{ lookup('token/nerc-ocp-prod.jwt') }}"
+
     - name: Configure oidc auth
       tags: [vault-oidc-auth]
       include_role:
