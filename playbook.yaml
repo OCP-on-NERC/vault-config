@@ -9,6 +9,8 @@
     vault_groups:
       - name: nerc-ops
         policy: nerc-all-writer
+      - name: vault-admins
+        policy: admin
       - name: nerc-org-admins
         policy: admin
   tasks:
@@ -63,7 +65,7 @@
       vars:
         cluster_name: nerc-ocp-prod
         kubernetes_host: https://api.nerc-ocp-prod.rc.fas.harvard.edu:6443
-        kubernetes_service_account_namespaces: openshift-config,openshift-ingress-operator
+        kubernetes_service_account_namespaces: openshift-config,openshift-ingress-operator,openshift-logging
         kubernetes_service_account_names: vault-secret-reader
         kubernetes_token_reviewer_jwt: "{{ lookup('token/nerc-ocp-prod.jwt') }}"
 
