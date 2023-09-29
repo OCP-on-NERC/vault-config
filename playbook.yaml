@@ -67,7 +67,7 @@
         kubernetes_host: https://api.nerc-ocp-prod.rc.fas.harvard.edu:6443
         kubernetes_service_account_namespaces: openshift-storage,group-sync-operator,openshift-config,openshift-ingress,openshift-logging,openshift-ingress-operator
         kubernetes_service_account_names: vault-secret-reader
-        kubernetes_token_reviewer_jwt: "{{ lookup('token/nerc-ocp-prod.jwt') }}"
+        kubernetes_token_reviewer_jwt: "{{ lookup('file', 'token/nerc-ocp-prod.jwt')|default(false) }}"
 
     - name: Configure oidc auth
       tags: [vault-oidc-auth]
