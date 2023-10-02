@@ -20,8 +20,9 @@
     token_validate: false
     path: "/auth/kubernetes/{{ cluster_name }}/config"
     data:
+      token_reviewer_jwt: "{{ kubernetes_token_reviewer_jwt|default('') }}"
       kubernetes_host: "{{ kubernetes_host }}"
-      token_reviewer_jwt: "{{ kubernetes_token_reviewer_jwt|default(omit) }}"
+      kubernetes_ca_cert: "{{ kubernetes_ca_cert|default(lookup('file', 'certs/letsencrypt_ca.crt')) }}"
 
 - name: "{{ cluster_name }}: configure role for clustersecretstore"
   community.hashi_vault.vault_write:
