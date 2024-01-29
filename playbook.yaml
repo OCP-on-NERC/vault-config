@@ -1,0 +1,24 @@
+- hosts: localhost
+  gather_facts: false
+  vars:
+    clusters:
+      - nerc-ocp-obs
+      - hypershift1
+  tasks:
+    - name: Check for required variable
+      when: vault_token is not defined or not vault_token
+      fail:
+        msg: "Missing required variable vault_token"
+
+    - name: Ensure cache directory exists
+      file:
+        path: ./rendered
+        state: directory
+
+    - name: "Apply vault configuration for cluster"
+      include_role:
+        name: apply_vault_config
+      loop: "{{ clusters }}"
+      loop_control:
+        loop_var: cluster_name
+

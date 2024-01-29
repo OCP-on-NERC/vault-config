@@ -1,0 +1,3 @@
+vault_addr: https://vault-ui-vault.apps.nerc-ocp-infra.rc.fas.harvard.edu
+vault_token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+
