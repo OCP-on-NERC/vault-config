@@ -1,0 +1,41 @@
+- name: "{{ cluster_name }} : Render jsonnet template"
+  command: jsonnet -J lib -J data clusters/{{ cluster_name }}.jsonnet
+  changed_when: false
+  no_log: true
+  register: rendered_config
+
+- name: "{{ cluster_name }} : Unmarshal cluster configuration"
+  set_fact:
+    config: "{{ rendered_config.stdout | from_json }}"
+
+- name: "{{ cluster_name }} : Cache rendered template for inspection"
+  copy:
+    content: "{{ config | to_nice_yaml }}"
+    dest: "rendered/{{ cluster_name }}.yaml"
+
+- name: "{{ cluster_name }} : Check for existing resources"
+  when: >
+    item.1['if-not-exists'] | default(false)
+  uri:
+    url: "{{ vault_addr }}{{ item.0 }}"
+    headers:
+      x-vault-token: "{{ vault_token }}"
+    status_code: [200, 404]
+  register: exists
+  loop: "{{ config.resources.items() }}"
+  loop_control:
+    label: "{{ item.0 }}"
+
+- name: "{{ cluster_name }} : Apply configuration"
+  tags: [apply]
+  uri:
+    url: "{{ vault_addr }}{{ item.item.0 }}"
+    headers:
+      x-vault-token: "{{ vault_token }}"
+    body_format: json
+    body: "{{ item.item.1.payload }}"
+  when: >
+    item.skipped|default(false) or item.status == 404
+  loop: "{{ exists.results }}"
+  loop_control:
+    label: "{{ item.item.0 }}"
