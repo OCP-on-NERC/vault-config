@@ -1,4 +1,4 @@
-## Requiremnents
+## Requirements
 
 1. You have a vault token in the `VAULT_TOKEN` environment variable with sufficient privileges to make changes to the vault configuration.
 
