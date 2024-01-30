@@ -1,0 +1,3 @@
+path "nerc/*" {
+  capabilities = ["read"]
+}

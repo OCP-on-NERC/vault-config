@@ -1,19 +1,19 @@
-- name: "{{ cluster_name }} : Render jsonnet template"
-  command: jsonnet -J lib -J data clusters/{{ cluster_name }}.jsonnet
+- name: "{{ config_path }} : Render jsonnet template"
+  command: jsonnet -J lib -J data {{ config_path }}
   changed_when: false
   no_log: true
   register: rendered_config
 
-- name: "{{ cluster_name }} : Unmarshal cluster configuration"
+- name: "{{ config_path }} : Unmarshal vault configuration"
   set_fact:
     config: "{{ rendered_config.stdout | from_json }}"
 
-- name: "{{ cluster_name }} : Cache rendered template for inspection"
+- name: "{{ config_path }} : Cache rendered template for inspection"
   copy:
     content: "{{ config | to_nice_yaml }}"
-    dest: "rendered/{{ cluster_name }}.yaml"
+    dest: "rendered/{{ (config_path | replace('/', '_') | splitext)[0] }}.yaml"
 
-- name: "{{ cluster_name }} : Check for existing resources"
+- name: "{{ config_path }} : Check for existing resources"
   when: >
     item['if-not-exists'] | default(false)
   uri:
@@ -27,7 +27,7 @@
   loop_control:
     label: "{{ item.path }}"
 
-- name: "{{ cluster_name }} : Apply configuration"
+- name: "{{ config_path }} : Apply configuration"
   tags: [apply]
   uri:
     url: "{{ vault_addr }}{{ item.item.path }}"
