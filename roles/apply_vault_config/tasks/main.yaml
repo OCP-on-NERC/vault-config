@@ -15,30 +15,30 @@
 
 - name: "{{ cluster_name }} : Check for existing resources"
   when: >
-    item.1['if-not-exists'] | default(false)
+    item['if-not-exists'] | default(false)
   uri:
-    url: "{{ vault_addr }}{{ item.0 }}"
+    url: "{{ vault_addr }}{{ item.path }}"
     method: GET
     headers:
       x-vault-token: "{{ vault_token }}"
     status_code: [200, 404]
   register: exists
-  loop: "{{ config.resources.items() }}"
+  loop: "{{ config.resources }}"
   loop_control:
-    label: "{{ item.0 }}"
+    label: "{{ item.path }}"
 
 - name: "{{ cluster_name }} : Apply configuration"
   tags: [apply]
   uri:
-    url: "{{ vault_addr }}{{ item.item.0 }}"
+    url: "{{ vault_addr }}{{ item.item.path }}"
     method: POST
     headers:
       x-vault-token: "{{ vault_token }}"
     body_format: json
-    body: "{{ item.item.1.payload }}"
+    body: "{{ item.item.payload }}"
     status_code: [200,204]
   when: >
     item.skipped|default(false) or item.status == 404
   loop: "{{ exists.results }}"
   loop_control:
-    label: "{{ item.item.0 }}"
+    label: "{{ item.item.path }}"

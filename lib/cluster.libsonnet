@@ -1,37 +1,55 @@
 function(
   cluster_name,
-  kubernetes_host,
-  kubernetes_ca_cert,
-  token_reviewer_jwt,
-  service_account_namespaces,
+  kubernetes_host="https://kubernetes.default.svc",
+  kubernetes_ca_cert=null,
+  token_reviewer_jwt=null,
+  service_account_namespaces="*",
+  service_account_name="vault-secret-reader",
 ) {
   metadata: {
     name: cluster_name,
   },
-  resources: {
-    [std.format('/v1/auth/kubernetes/%s/config', cluster_name)]: {
+  resources: [
+
+    // Enable "kubernetes/<cluster_name>" as a kubernetes auth endpoint
+    {
+      path: std.format("/v1/sys/auth/kubernetes/%s", cluster_name),
+      "if-not-exists": true,
       payload: {
-        kubernetes_ca_cert: kubernetes_ca_cert,
+        type: "kubernetes",
+      },
+    },
+
+    // https://developer.hashicorp.com/vault/api-docs/auth/kubernetes#configure-method
+    {
+      path: std.format("/v1/auth/kubernetes/%s/config", cluster_name),
+      payload: {
         kubernetes_host: kubernetes_host,
+      } + if kubernetes_ca_cert == null then {} else {
+        kubernetes_ca_cert: kubernetes_ca_cert,
+      } + if token_reviewer_jwt == null then {} else {
         token_reviewer_jwt: token_reviewer_jwt,
       },
     },
-    [std.format('/v1/auth/kubernetes/%s/role/secret-reader', cluster_name)]: {
+
+    // https://developer.hashicorp.com/vault/api-docs/auth/kubernetes#create-update-role
+    {
+      path: std.format("/v1/auth/kubernetes/%s/role/secret-reader", cluster_name),
       payload: {
         bound_service_account_names: [
-          'vault-secret-reader',
+          service_account_name,
         ],
         bound_service_account_namespaces: service_account_namespaces,
-        name: 'secret-reader',
+        name: "secret-reader",
+        token_policies: [
+          std.format("%s-reader", cluster_name),
+        ],
       },
     },
-    [std.format('/v1/sys/auth/kubernetes/%s', cluster_name)]: {
-      'if-not-exists': true,
-      payload: {
-        type: 'kubernetes',
-      },
-    },
-    [std.format('/v1/sys/policy/%s-reader', cluster_name)]: {
+
+    // https://developer.hashicorp.com/vault/api-docs/system/policy#create-update-policy
+    {
+      path: std.format("/v1/sys/policy/%s-reader", cluster_name),
       payload: {
         policy: std.format(|||
           path "nerc/data/%s/*" {
@@ -40,7 +58,8 @@ function(
         |||, cluster_name),
       },
     },
-    [std.format('/v1/sys/policy/%s-writer', cluster_name)]: {
+    {
+      path: std.format("/v1/sys/policy/%s-writer", cluster_name),
       payload: {
         policy: std.format(|||
           path "nerc/data/%s-ocp-obs/*" {
@@ -49,5 +68,5 @@ function(
         |||, cluster_name),
       },
     },
-  },
+  ],
 }
