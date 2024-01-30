@@ -18,6 +18,7 @@
     item.1['if-not-exists'] | default(false)
   uri:
     url: "{{ vault_addr }}{{ item.0 }}"
+    method: GET
     headers:
       x-vault-token: "{{ vault_token }}"
     status_code: [200, 404]
@@ -30,10 +31,12 @@
   tags: [apply]
   uri:
     url: "{{ vault_addr }}{{ item.item.0 }}"
+    method: POST
     headers:
       x-vault-token: "{{ vault_token }}"
     body_format: json
     body: "{{ item.item.1.payload }}"
+    status_code: [200,204]
   when: >
     item.skipped|default(false) or item.status == 404
   loop: "{{ exists.results }}"
