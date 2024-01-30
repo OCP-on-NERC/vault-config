@@ -2,6 +2,7 @@
   gather_facts: false
   vars:
     clusters:
+      - nerc-ocp-infra
       - nerc-ocp-prod
       - nerc-ocp-obs
       - hypershift1
