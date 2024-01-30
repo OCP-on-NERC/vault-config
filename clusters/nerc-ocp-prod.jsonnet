@@ -12,7 +12,7 @@ local service_account_namespaces = [
 
 cluster(
   "nerc-ocp-prod",
-  "https://api.nerc-ocp-prod.rc.fas.harvard.edu:6443",
+  "https://api.shift.nerc.mghpcc.org:6443",
   importstr "certs/letsencrypt_ca.crt",
   importstr "tokens/nerc-ocp-prod.txt",
   service_account_namespaces,
