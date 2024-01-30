@@ -1,9 +1,7 @@
 local cluster = import "cluster.libsonnet";
 
 local service_account_namespaces = [
-  "openshift-config",
-  "openshift-ingress",
-  "openshift-ingress-operator",
+  "external-secrets-operator",
 ];
 
 cluster(
