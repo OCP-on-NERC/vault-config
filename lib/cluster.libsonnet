@@ -40,7 +40,6 @@ function(
           service_account_name,
         ],
         bound_service_account_namespaces: service_account_namespaces,
-        name: "secret-reader",
         token_policies: [
           std.format("%s-reader", cluster_name),
         ],
