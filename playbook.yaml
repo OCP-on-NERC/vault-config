@@ -17,9 +17,26 @@
         path: ./rendered
         state: directory
 
-    - name: "Apply vault configuration for cluster"
+    - name: "Apply global vault configuration"
+      tags: [globalcfg]
       include_role:
         name: apply_vault_config
+        apply:
+          tags: globalcfg
+      loop:
+        - global/kv2.jsonnet
+        - global/policies.jsonnet
+      loop_control:
+        loop_var: config_path
+
+    - name: "Apply vault configuration for clusters"
+      tags: [clustercfg]
+      include_role:
+        name: apply_vault_config
+        apply:
+          tags: clustercfg
+      vars:
+        config_path: "clusters/{{ cluster_name }}.jsonnet"
       loop: "{{ clusters }}"
       loop_control:
         loop_var: cluster_name
