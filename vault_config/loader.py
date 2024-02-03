@@ -21,6 +21,7 @@ class Loader:
     def __init__(self, import_directories=None):
         self.import_directories = import_directories or []
         self.paths = {}
+        self.tmpdir = None
 
     def __enter__(self):
         self.tmpdir = tempfile.TemporaryDirectory()
@@ -51,6 +52,10 @@ class Loader:
     def load_yaml_content(self, content):
         return yaml.safe_load(content)
 
+    def load_yaml_template(self, path):
+        content = self.process_template(path)
+        return self.load_yaml_content(content)
+
     def process_template(self, path):
         with open(path) as fd:
             template = jinja2.Template(fd.read())
@@ -79,10 +84,10 @@ class Loader:
         '''
 
         LOG.debug("loading %s", path)
-        if fnmatch(path, "*.yaml"):
+        if fnmatch(path, "*.j2.yaml"):
+            loader = self.load_yaml_template
+        elif fnmatch(path, "*.yaml"):
             loader = self.load_yaml_file
-        elif fnmatch(path, "*.j2.yaml"):
-            loader = lambda path: self.load_yaml_content(self.process_template(path))
         elif fnmatch(path, "*.json"):
             loader = self.load_json_file
         elif fnmatch(path, "*.jsonnet"):
