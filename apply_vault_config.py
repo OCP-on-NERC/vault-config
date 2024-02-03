@@ -18,7 +18,7 @@ CLUSTERS = [
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--load-only", action="store_true")
+    p.add_argument("--load-only", "-l", action="store_true")
     p.add_argument("--verbose", "-v", action="count", default=0)
     p.add_argument("--clusters", "-c", action="append", default=None)
     p.add_argument(
