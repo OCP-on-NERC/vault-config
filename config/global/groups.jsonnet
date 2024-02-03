@@ -1,15 +1,17 @@
-local group(name, policy, type='external', auth_name='oidc', alias_name=null) = {
-  name: name,
-  type: type,
-  policy: policy,
-  auth_name: auth_name,
-  alias_name: alias_name,
-};
+local groups = [
+  { name: 'nerc-ops', policy: 'nerc-all-writer' },
+  { name: 'vault-admins', policy: 'admin' },
+  { name: 'nerc-org-admins', policy: 'admin' },
+];
 
 {
   groups: [
-    group('nerc-ops', 'nerc-all-writer'),
-    group('vault-admins', 'admin'),
-    group('nerc-org-admins', 'admin'),
+    {
+      name: group.name,
+      type: 'external',
+      policy: group.policy,
+      auth_name: 'oidc',
+    }
+    for group in groups
   ],
 }
