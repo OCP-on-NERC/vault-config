@@ -1,3 +1,15 @@
+# NERC Vault Configuration
+
+## Project structure
+
+- `config/global` -- global vault configuration (configure authentication, groups, global policies, etc)
+- `config/clusters` -- per-cluster configuration
+- `lib/` -- [jsonnet] templates, vault [hcl] policies, certificates
+- `data/` -- for secret data not stored in the repository (you will need to provision this manually)
+
+[jsonnet]: https://jsonnet.org/
+[hcl]: https://github.com/hashicorp/hcl
+
 ## Requiremnents
 
 1. You have a vault token in the `VAULT_TOKEN` environment variable with sufficient privileges to make changes to the vault configuration.
@@ -5,8 +17,6 @@
 1. You have administrative access to each cluster in order to generate ServiceAccount tokens.
 
 1. You are able to generate or acquire a client secret for OIDC authentication using Dex on the infra cluster.
-
-[jsonnet]: https://jsonnet.org/
 
 ## Generate ServiceAccount Tokens
 
@@ -26,7 +36,7 @@ In order to configure OIDC authentication on the vault, you will need a client s
 
 ## Apply the configuration
 
-After you have generated tokens for all the target clusters, you can run the `apply_vault_config.py` script:
+After you have the dex oidc secret and tokens for all the target clusters, you can run the `apply_vault_config.py` script:
 
 ```
 python apply_vault_config.py
