@@ -13,6 +13,7 @@ CLUSTERS = [
     "nerc-ocp-prod",
     "nerc-ocp-infra",
     "nerc-ocp-obs",
+    "nerc-ocp-test",
 ]
 
 
