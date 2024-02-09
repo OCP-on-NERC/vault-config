@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+import fnmatch
 
 from urllib.parse import urljoin
 
@@ -111,32 +112,46 @@ class VaultConfig:
         res = self.session.get(url)
         res.raise_for_status()
 
-    def apply_config(self, loader):
+    def apply_config(
+        self, loader, path_restrictions=None, config_resources=True, config_groups=True
+    ):
         for path in loader:
             LOG.info("apply config from %s", path)
             data = loader.get(path)
 
-            for resource in data.get("resources", []):
-                url = resource["path"]
-                if resource.get("if-not-exists"):
-                    try:
-                        self.get(url)
-                    except requests.exceptions.HTTPError:
-                        pass
-                    else:
-                        LOG.info("not creating %s: already exists", resource["path"])
-                        continue
+            if config_resources:
+                for resource in data.get("resources", []):
+                    url = resource["path"]
+                    if path_restrictions:
+                        for pattern in path_restrictions:
+                            if fnmatch.fnmatch(url, pattern):
+                                break
+                        else:
+                            LOG.info("skipping %s: does not match restrictions", url)
+                            continue
 
-                LOG.info("update %s", resource["path"])
-                self.post(url, data=resource["payload"])
+                    if resource.get("if-not-exists"):
+                        try:
+                            self.get(url)
+                        except requests.exceptions.HTTPError:
+                            pass
+                        else:
+                            LOG.info(
+                                "not creating %s: already exists", resource["path"]
+                            )
+                            continue
 
-            for group in data.get("groups", []):
-                self.create_or_update_group(
-                    group["name"], group["type"], group["policy"]
-                )
-                if group["type"] == "external":
-                    self.create_group_alias(
-                        group["auth_name"],
-                        group["name"],
-                        alias_name=group.get("alias_name"),
+                    LOG.info("update %s", resource["path"])
+                    self.post(url, data=resource["payload"])
+
+            if config_groups:
+                for group in data.get("groups", []):
+                    self.create_or_update_group(
+                        group["name"], group["type"], group["policy"]
                     )
+                    if group["type"] == "external":
+                        self.create_group_alias(
+                            group["auth_name"],
+                            group["name"],
+                            alias_name=group.get("alias_name"),
+                        )

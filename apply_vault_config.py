@@ -19,20 +19,53 @@ CLUSTERS = [
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--load-only", "-l", action="store_true")
+    p.add_argument(
+        "--load-only",
+        "-l",
+        action="store_true",
+        help="Validate configuration files but do not apply configuration",
+    )
     p.add_argument("--verbose", "-v", action="count", default=0)
-    p.add_argument("--clusters", "-c", action="append", default=None)
+    p.add_argument(
+        "--clusters",
+        "-c",
+        action="append",
+        default=None,
+        help="Specify cluster configurations to apply",
+    )
     p.add_argument(
         "--no-clusters",
         action="store_const",
         const=True,
         default=False,
+        help="Do not apply cluster-specific configuration",
     )
     p.add_argument(
         "--no-global",
         action="store_const",
         const=True,
         default=False,
+        help="Do not apply global configuration",
+    )
+    p.add_argument(
+        "--no-resources",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Do not apply resources",
+    )
+    p.add_argument(
+        "--no-groups",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Do not apply groups",
+    )
+    p.add_argument(
+        "--path",
+        "-p",
+        action="append",
+        help="Only apply resources that match the specified glob patterns",
     )
     return p.parse_args()
 
@@ -66,7 +99,12 @@ def main():
                 loader.load(f"config/clusters/{cluster}.jsonnet")
 
         if not args.load_only:
-            vc.apply_config(loader)
+            vc.apply_config(
+                loader,
+                path_restrictions=args.path,
+                config_resources=(not args.no_resources),
+                config_groups=(not args.no_groups),
+            )
 
 
 if __name__ == "__main__":
