@@ -41,6 +41,7 @@ function(
         ],
         bound_service_account_namespaces: service_account_namespaces,
         token_policies: [
+          "nerc-common-reader",
           std.format("%s-reader", cluster_name),
         ],
       },

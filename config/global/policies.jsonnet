@@ -13,6 +13,12 @@
       },
     },
     {
+      path: '/v1/sys/policy/nerc-common-reader',
+      payload: {
+        policy: importstr 'policies/nerc-common-reader.hcl',
+      },
+    },
+    {
       path: '/v1/sys/policy/nerc-all-reader',
       payload: {
         policy: importstr 'policies/nerc-all-reader.hcl',
