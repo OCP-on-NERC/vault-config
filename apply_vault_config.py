@@ -8,12 +8,16 @@ import dotenv
 
 dotenv.load_dotenv()
 
-CLUSTERS = [
-    "hypershift1",
-    "nerc-ocp-prod",
-    "nerc-ocp-infra",
-    "nerc-ocp-obs",
-    "nerc-ocp-test",
+CONFIGS = [
+    "config/global/kv2.jsonnet",
+    "config/global/oidc.jsonnet",
+    "config/global/groups.jsonnet",
+    "config/global/policies.jsonnet",
+    "config/clusters/hypershift1.jsonnet",
+    "config/clusters/nerc-ocp-infra.jsonnet",
+    "config/clusters/nerc-ocp-obs.jsonnet",
+    "config/clusters/nerc-ocp-prod.jsonnet",
+    "config/clusters/nerc-ocp-test.jsonnet",
 ]
 
 
@@ -32,20 +36,6 @@ def parse_args():
         action="append",
         default=None,
         help="Specify cluster configurations to apply",
-    )
-    p.add_argument(
-        "--no-clusters",
-        action="store_const",
-        const=True,
-        default=False,
-        help="Do not apply cluster-specific configuration",
-    )
-    p.add_argument(
-        "--no-global",
-        action="store_const",
-        const=True,
-        default=False,
-        help="Do not apply global configuration",
     )
     p.add_argument(
         "--no-resources",
@@ -67,15 +57,13 @@ def parse_args():
         action="append",
         help="Only apply resources that match the specified glob patterns",
     )
+
+    p.add_argument('configs', nargs='*', default=CONFIGS)
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-    if args.clusters is None:
-        args.clusters = CLUSTERS
-    else:
-        args.clusters = [name for group in args.clusters for name in group.split(",")]
 
     loglevel = [logging.INFO, logging.DEBUG][min(args.verbose, 1)]
     logging.basicConfig(level=loglevel)
@@ -88,15 +76,8 @@ def main():
         # This prevents us from accidentally picking up files that are
         # incomplete, inaccurate, or still under development.
 
-        if not args.no_global:
-            loader.load("config/global/kv2.jsonnet")
-            loader.load("config/global/policies.jsonnet")
-            loader.load("config/global/oidc.jsonnet")
-            loader.load("config/global/groups.jsonnet")
-
-        if not args.no_clusters:
-            for cluster in args.clusters:
-                loader.load(f"config/clusters/{cluster}.jsonnet")
+        for path in args.configs:
+            loader.load(path)
 
         if not args.load_only:
             vc.apply_config(
