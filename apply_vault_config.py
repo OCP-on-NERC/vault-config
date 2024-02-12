@@ -13,6 +13,7 @@ CONFIGS = [
     "config/global/oidc.jsonnet",
     "config/global/groups.jsonnet",
     "config/global/policies.jsonnet",
+    "config/backup-job.jsonnet",
     "config/clusters/hypershift1.jsonnet",
     "config/clusters/nerc-ocp-infra.jsonnet",
     "config/clusters/nerc-ocp-obs.jsonnet",
