@@ -26,6 +26,11 @@ jobs:
         run: |
           pip install pre-commit
 
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install jsonnet
+
       - name: Run linters
         run: |
           pre-commit run --all-files

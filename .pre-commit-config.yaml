@@ -24,3 +24,11 @@ repos:
         files: \.(yaml|yml)$
         types: [file, yaml]
         entry: yamllint --strict
+
+  - repo: local
+    hooks:
+      - id: jsonnetfmt
+        name: Format jsonnet files
+        files: \.(jsonnet|libsonnet)
+        language: script
+        entry: ./scripts/jsonnetfmt-all.sh
