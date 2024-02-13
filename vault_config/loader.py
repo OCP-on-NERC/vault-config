@@ -8,7 +8,6 @@ import _jsonnet as jsonnet
 
 from pathlib import Path
 from fnmatch import fnmatch
-from contextlib import contextmanager
 
 from .exceptions import InvalidFileTypeError
 
@@ -16,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Loader:
-    '''Load serialized data into a local cache.'''
+    """Load serialized data into a local cache."""
 
     def __init__(self, import_directories=None):
         self.import_directories = import_directories or []
@@ -32,7 +31,7 @@ class Loader:
         self.tmpdir = None
 
     def import_callback(self, parent, path):
-        '''Resolve jsonnet imports'''
+        """Resolve jsonnet imports"""
 
         LOG.debug("jsonnet import %s", path)
         for importdir in [parent] + self.import_directories:
@@ -75,13 +74,13 @@ class Loader:
         return json.loads(content)
 
     def load(self, path):
-        '''Load a document into our local cache.
+        """Load a document into our local cache.
 
         This function unmarshals the given path into a Python data
         structure, and then writes it out as a JSON file in self.tmpdir.
         This pre-processing ensures that the files are syntactically
         correct and that any dependencies can be successfully resolved.
-        '''
+        """
 
         LOG.debug("loading %s", path)
         if fnmatch(path, "*.j2.yaml"):
