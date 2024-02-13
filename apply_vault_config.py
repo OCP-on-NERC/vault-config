@@ -25,6 +25,12 @@ CONFIGS = [
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument(
+        "-d",
+        "--data-directory",
+        default="data",
+        help="Path to directory containing secrets",
+    )
+    p.add_argument(
         "--load-only",
         "-l",
         action="store_true",
@@ -59,7 +65,7 @@ def parse_args():
         help="Only apply resources that match the specified glob patterns",
     )
 
-    p.add_argument('configs', nargs='*', default=CONFIGS)
+    p.add_argument("configs", nargs="*", default=CONFIGS)
     return p.parse_args()
 
 
@@ -69,7 +75,7 @@ def main():
     loglevel = [logging.INFO, logging.DEBUG][min(args.verbose, 1)]
     logging.basicConfig(level=loglevel)
 
-    loader = Loader(import_directories=["lib", "data"])
+    loader = Loader(import_directories=["lib", args.data_directory])
     vc = VaultConfig()
 
     with loader:
