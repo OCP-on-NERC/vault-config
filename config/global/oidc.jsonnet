@@ -5,7 +5,7 @@
       "if-not-exists": true,
       payload: {
         type: "oidc",
-	description: "OIDC authentication via Dex on nerc-ocp-infra",
+        description: "OIDC authentication via Dex on nerc-ocp-infra",
         config: {
           listing_visibility: "unauth",
         },

@@ -1,3 +1,4 @@
 /rendered
 /data/tokens
 /.env
+data/secrets/
