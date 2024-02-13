@@ -8,6 +8,7 @@ local service_account_namespaces = [
   "openshift-logging",
   "openshift-ingress-operator",
   "openshift-logging",
+  "koku-metrics-operator",
 ];
 
 cluster(
