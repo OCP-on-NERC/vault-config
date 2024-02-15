@@ -9,6 +9,7 @@ local service_account_namespaces = [
   'openshift-ingress-operator',
   'openshift-logging',
   'koku-metrics-operator',
+  'curator-system',
 ];
 
 cluster(
