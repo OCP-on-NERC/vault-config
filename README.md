@@ -1,3 +1,5 @@
+**THIS REPOSITORY IS DEPRECATED; SEE https://github.com/OCP-on-NERC/nerc-ocp-config/tree/main/vault/config/overlays/nerc-ocp-infra INSTEAD**
+
 # NERC Vault Configuration
 
 ## Project structure
